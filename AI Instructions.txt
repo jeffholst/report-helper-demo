@@ -1,0 +1,78 @@
+Write a react app with the following UI.  The app will deployed to GitHub and then hosted with GitHub pages.
+
+UI Top section:
+
+Control="TextField1", Label="API URL", Display="Plain"
+
+default: https://ai-api.harriscomputer.io/api/reports
+
+Control="TextField2", Label="API Key", Display="Password"
+
+Add an eyeball icon to hide/display this field.
+
+UI Middle section:
+
+Control="MultiLineTextField1, 20 lines with scrollbar", Label="JSON", Display="Plain"
+
+Control="TextField3", Label="ID Field", Display="Plain"
+
+Control="Button1", Label="Submit", Action="Call API URL"
+
+Control="TextField4", Lable="Report Key", Display="Plain"
+
+UI Bottom section:
+
+Control="MultiLineTextField2, 3 lines with scroll bar", Label="Question", Display="Plain"
+
+Control="Button2", Label="Submit", Action="Call update API URL",
+
+Control="MultiLineTextField3, 3 lines with scroll bar", Display="Results from Button2"
+
+Application Logic:
+
+Button1 calls the API from TextField2 with Authentication Bearer Token from TextField2. The Request Body looks like this:
+
+{
+
+"data": [
+
+{
+
+  "additionalProperty": null
+
+}
+],
+
+"uniqueIdentifier": ""
+
+}
+
+WHERE the data array = the JSOn from MultiLineTextField1 and uniqueIdentifier = the value from TextField4.
+
+The results from Button1 will look like this
+
+{
+
+"reportId": "123e4567-e89b-12d3-a456-426614174000",
+
+"rowCount": 0,
+
+"expiresAt": "2026-02-26T12:17:45.698Z"
+
+}
+
+The reportId should then be put in TextField4
+
+Once TextField4 has a value and MultiLineTextField2 has a value then Button2 is enabled
+
+Button2 then calls the API from TextField2 with the following appended to the URL "/{id}/query" where {id} = the value from reportID with Authentication Bearer Token from TextField2. The Request Body looks like this:
+
+{
+
+"prompt": ""
+
+}
+
+WHERE the prompt value is the value from MultiLineTextField2
+
+The results from the API call should then be displayed in MultiLineTextField3

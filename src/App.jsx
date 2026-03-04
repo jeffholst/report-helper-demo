@@ -723,10 +723,32 @@ const DEFAULT_JSON_DATA = `[
   }
 ]`
 
+// CORS proxy for production (corsproxy.io is a free service)
+const CORS_PROXY = 'https://corsproxy.io/?'
+
+// Default API URL
+const DEFAULT_API_URL = 'https://ai-api.harriscomputer.io/api/reports'
+
+// Helper to wrap URL with CORS proxy in production
+const withCorsProxy = (url) => {
+  // In development, rewrite to use Vite proxy
+  if (import.meta.env.DEV) {
+    // Convert full URL to relative path for Vite proxy
+    if (url.includes('ai-api.harriscomputer.io')) {
+      return url.replace('https://ai-api.harriscomputer.io', '')
+    }
+    return url
+  }
+  // In production, wrap with CORS proxy if it's an absolute URL
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return CORS_PROXY + encodeURIComponent(url)
+  }
+  return url
+}
+
 function App() {
   // Top section state
-  // Use relative URL in development (proxied by Vite), full URL in production
-  const [apiUrl, setApiUrl] = useState('/api/reports')
+  const [apiUrl, setApiUrl] = useState(DEFAULT_API_URL)
   const [apiKey, setApiKey] = useState(() => getCookie('apiKey'))
   const [showApiKey, setShowApiKey] = useState(false)
 
@@ -783,7 +805,7 @@ function App() {
         uniqueIdentifier: idField
       }
 
-      const response = await fetch(apiUrl, {
+      const response = await fetch(withCorsProxy(apiUrl), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -819,7 +841,7 @@ function App() {
         prompt: question
       }
 
-      const response = await fetch(queryUrl, {
+      const response = await fetch(withCorsProxy(queryUrl), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
