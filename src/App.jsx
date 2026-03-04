@@ -777,7 +777,19 @@ function App() {
   // Bottom section state
   const [question, setQuestion] = useState('')
   const [results, setResults] = useState('')
+  const [parsedResults, setParsedResults] = useState({ summary: '', matchingIdentifiers: [] })
   const [isSubmitting2, setIsSubmitting2] = useState(false)
+  const [resultsTab, setResultsTab] = useState('visual')
+
+  // Get matching rows from parsedData based on matchingIdentifiers
+  const matchingRows = useMemo(() => {
+    if (!parsedResults.matchingIdentifiers || parsedResults.matchingIdentifiers.length === 0) {
+      return []
+    }
+    return parsedData.filter(row => 
+      parsedResults.matchingIdentifiers.includes(row[idField])
+    )
+  }, [parsedData, parsedResults.matchingIdentifiers, idField])
 
   // Button2 is enabled when reportKey and question have values
   const isButton2Enabled = reportKey.trim() !== '' && question.trim() !== ''
@@ -856,10 +868,21 @@ function App() {
 
       const result = await response.json()
       
-      // Display results in MultiLineTextField3
+      // Store raw JSON results
       setResults(typeof result === 'string' ? result : JSON.stringify(result, null, 2))
+      
+      // Parse structured results for visual display
+      if (result && typeof result === 'object') {
+        setParsedResults({
+          summary: result.summary || '',
+          matchingIdentifiers: result.matchingIdentifiers || []
+        })
+      } else {
+        setParsedResults({ summary: '', matchingIdentifiers: [] })
+      }
     } catch (error) {
       setResults(`Error: ${error.message}`)
+      setParsedResults({ summary: '', matchingIdentifiers: [] })
     } finally {
       setIsSubmitting2(false)
     }
@@ -1020,15 +1043,56 @@ function App() {
           {isSubmitting2 ? 'Submitting...' : 'Submit'}
         </button>
 
-        <div className="field-group">
-          <label htmlFor="results">Results</label>
-          <textarea
-            id="results"
-            value={results}
-            readOnly
-            className="multiline-field multiline-3"
-            placeholder="Results will appear here..."
-          />
+        {/* Results Tab Navigation */}
+        <div className="tab-navigation">
+          <button
+            className={`tab-button ${resultsTab === 'visual' ? 'active' : ''}`}
+            onClick={() => setResultsTab('visual')}
+          >
+            Visual
+          </button>
+          <button
+            className={`tab-button ${resultsTab === 'json' ? 'active' : ''}`}
+            onClick={() => setResultsTab('json')}
+          >
+            JSON
+          </button>
+        </div>
+
+        {/* Results Tab Content */}
+        <div className="tab-content results-tab-content">
+          {resultsTab === 'json' && (
+            <div className="field-group">
+              <label htmlFor="results">Raw JSON</label>
+              <textarea
+                id="results"
+                value={results}
+                readOnly
+                className="multiline-field multiline-10"
+                placeholder="Results will appear here..."
+              />
+            </div>
+          )}
+
+          {resultsTab === 'visual' && (
+            <>
+              <div className="field-group">
+                <label htmlFor="summary">Summary</label>
+                <textarea
+                  id="summary"
+                  value={parsedResults.summary}
+                  readOnly
+                  className="multiline-field multiline-3"
+                  placeholder="Summary will appear here..."
+                />
+              </div>
+
+              <div className="field-group">
+                <label>Matching Records ({matchingRows.length})</label>
+                <DataGrid data={matchingRows} maxColumns={null} />
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

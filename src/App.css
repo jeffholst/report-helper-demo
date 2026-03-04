@@ -101,6 +101,15 @@ h1 {
   /* Approximately 3 lines */
 }
 
+.multiline-10 {
+  min-height: 220px;
+  /* Approximately 10 lines */
+}
+
+.results-tab-content {
+  min-height: 300px;
+}
+
 .submit-button {
   background-color: #0066cc;
   color: white;
@@ -123,8 +132,9 @@ h1 {
   cursor: not-allowed;
 }
 
-/* Read-only results field styling */
-#results {
+/* Read-only field styling */
+#results,
+#summary {
   background-color: #f5f5f5;
 }
 
