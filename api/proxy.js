@@ -1,27 +1,4 @@
-const UPSTREAM_BASE_URL = 'https://ai-api.harriscomputer.io/api/reports'
-
-function buildUpstreamUrl(req) {
-  const slug = Array.isArray(req.query.slug)
-    ? req.query.slug.filter(Boolean)
-    : req.query.slug
-      ? [req.query.slug]
-      : []
-
-  const upstreamUrl = new URL(`${UPSTREAM_BASE_URL}/${slug.join('/')}`.replace(/\/$/, ''))
-
-  for (const [key, value] of Object.entries(req.query)) {
-    if (key === 'slug') {
-      continue
-    }
-    if (Array.isArray(value)) {
-      value.forEach((item) => upstreamUrl.searchParams.append(key, item))
-    } else if (value !== undefined) {
-      upstreamUrl.searchParams.append(key, value)
-    }
-  }
-
-  return upstreamUrl.toString()
-}
+const UPSTREAM_BASE_URL = 'https://ai-api.harriscomputer.io'
 
 function getRequestBody(req) {
   if (req.method === 'GET' || req.method === 'HEAD') {
@@ -41,7 +18,9 @@ function getRequestBody(req) {
 
 export default async function handler(req, res) {
   try {
-    const upstreamUrl = buildUpstreamUrl(req)
+    // Reconstruct the path from the original URL
+    const upstreamUrl = new URL(req.url, UPSTREAM_BASE_URL)
+
     const headers = {}
 
     if (req.headers.authorization) {
@@ -52,7 +31,7 @@ export default async function handler(req, res) {
       headers['Content-Type'] = req.headers['content-type']
     }
 
-    const upstreamResponse = await fetch(upstreamUrl, {
+    const upstreamResponse = await fetch(upstreamUrl.toString(), {
       method: req.method,
       headers,
       body: getRequestBody(req)
