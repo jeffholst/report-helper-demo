@@ -723,8 +723,8 @@ const DEFAULT_JSON_DATA = `[
   }
 ]`
 
-// CORS proxy for production (corsproxy.io is a free service)
-const CORS_PROXY = 'https://corsproxy.io/?'
+// CORS proxy for production (api.allorigins.win is more reliable than corsproxy.io)
+const CORS_PROXY = 'https://api.allorigins.win/raw?url='
 
 // Default API URL
 const DEFAULT_API_URL = 'https://ai-api.harriscomputer.io/api/reports'
