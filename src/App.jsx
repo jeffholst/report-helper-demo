@@ -723,27 +723,22 @@ const DEFAULT_JSON_DATA = `[
   }
 ]`
 
-// CORS proxy for production (api.allorigins.win is more reliable than corsproxy.io)
-const CORS_PROXY = 'https://api.allorigins.win/raw?url='
+// Default to same-origin API path so Vercel can proxy requests server-side.
+const DEFAULT_API_URL = '/api/reports'
 
-// Default API URL
-const DEFAULT_API_URL = 'https://ai-api.harriscomputer.io/api/reports'
+const normalizeApiUrl = (url) => {
+  const trimmed = (url || '').trim()
 
-// Helper to wrap URL with CORS proxy in production
-const withCorsProxy = (url) => {
-  // In development, rewrite to use Vite proxy
-  if (import.meta.env.DEV) {
-    // Convert full URL to relative path for Vite proxy
-    if (url.includes('ai-api.harriscomputer.io')) {
-      return url.replace('https://ai-api.harriscomputer.io', '')
-    }
-    return url
+  if (!trimmed) {
+    return DEFAULT_API_URL
   }
-  // In production, wrap with CORS proxy if it's an absolute URL
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    return CORS_PROXY + encodeURIComponent(url)
+
+  // Keep existing full Harris API URLs working by converting to relative /api path.
+  if (trimmed.startsWith('https://ai-api.harriscomputer.io')) {
+    return trimmed.replace('https://ai-api.harriscomputer.io', '')
   }
-  return url
+
+  return trimmed
 }
 
 function App() {
@@ -817,7 +812,7 @@ function App() {
         uniqueIdentifier: idField
       }
 
-      const response = await fetch(withCorsProxy(apiUrl), {
+      const response = await fetch(normalizeApiUrl(apiUrl), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -847,13 +842,14 @@ function App() {
   const handleSubmit2 = async () => {
     setIsSubmitting2(true)
     try {
-      const queryUrl = `${apiUrl}/${reportKey}/query`
+      const baseUrl = normalizeApiUrl(apiUrl).replace(/\/$/, '')
+      const queryUrl = `${baseUrl}/${encodeURIComponent(reportKey)}/query`
       
       const requestBody = {
         prompt: question
       }
 
-      const response = await fetch(withCorsProxy(queryUrl), {
+      const response = await fetch(queryUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

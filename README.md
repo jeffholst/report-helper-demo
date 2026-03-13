@@ -45,6 +45,16 @@ npm run deploy
 
 This requires the `gh-pages` package and proper repository configuration.
 
+## Deployment to Vercel
+
+This repo includes a Vercel serverless proxy at `/api/reports/*` that forwards to the Harris API.
+
+- The frontend defaults to `/api/reports`, so browser requests stay same-origin.
+- API key is forwarded as the `Authorization` header by the Vercel function.
+- This avoids browser CORS errors from direct client calls to `ai-api.harriscomputer.io`.
+
+After importing the repo in Vercel, deploy normally with the Vite build command.
+
 ## Usage
 
 1. Enter your API Key
