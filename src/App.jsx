@@ -878,7 +878,8 @@ function App() {
       }
     } catch (error) {
       setResults(`Error: ${error.message}`)
-      setParsedResults({ summary: '', matchingIdentifiers: [] })
+      setParsedResults({ summary: error.message, matchingIdentifiers: [] })
+      setResultsTab('json')
     } finally {
       setIsSubmitting2(false)
     }
